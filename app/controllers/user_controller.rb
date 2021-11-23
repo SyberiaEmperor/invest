@@ -1,6 +1,12 @@
 class UserController < ApplicationController
+
   def info
-    p "Bubba"
-    render json: {'alpha':1}
+    #Получаем токен из Header и делаем магию
+    render json: {
+      name: "Name",
+      id:1,
+      hz:nil
+    }
   end
+
 end
