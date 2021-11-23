@@ -1,5 +1,5 @@
 class TransactionController < ApplicationController
-
+  protect_from_forgery with: :null_session
   def delete
     #Получаем токен из Header и делаем магию
     token = request.headers[:Authorization]
