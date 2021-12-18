@@ -1,21 +1,30 @@
 class AuthController < ApplicationController
   protect_from_forgery with: :null_session
 
-  @jwt = "JWTOKEN"
 
-  def _refresh_token
-      @jwt = "JWTOKEN"
-  end
+
+
 
     def sign_up
-        _refresh_token if @jwt.nil?
+      @user = User.new(user_params)
+      if @user.save
+        token = ApplicationHelper::JsonWebToken.encode(user_id: @user.id)
         render json: {
-          login: params[:login],
-          password: params[:password],
-          jwt: @jwt
+          token: token
         }
+      else
+        render json: {
+          errors: @user.errors.full_messages
+        },
+               status: :unprocessable_entity
+      end
     end
 
+  private
+  def user_params
+    # strong parameters
+    params.permit(:login, :password)
+  end
 
 
   #TODO: Прям ваще одинаковый код нарисовывается, надо бы подумать
@@ -29,11 +38,8 @@ class AuthController < ApplicationController
     end
 
   def sign_out
-    token = request.headers[:Authorization]
-    if token.to_s.empty?
-      head :unauthorized
-      return
-    end
+    :authorize_request
+    # TODO: Подумать как это сделать
     @jwt = nil
     head :ok
   end
