@@ -35,12 +35,6 @@ class AuthController < ApplicationController
       end
     end
 
-  def sign_out
-    :authorize_request
-    # TODO: Подумать как это сделать
-    @jwt = nil
-    head :ok
-  end
 
   private
   def user_params
