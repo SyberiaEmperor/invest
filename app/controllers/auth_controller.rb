@@ -2,9 +2,6 @@ class AuthController < ApplicationController
   protect_from_forgery with: :null_session
 
 
-
-
-
     def sign_up
       @user = User.new(user_params)
       if @user.save
@@ -20,21 +17,22 @@ class AuthController < ApplicationController
       end
     end
 
-  private
-  def user_params
-    # strong parameters
-    params.permit(:login, :password)
-  end
+
 
 
   #TODO: Прям ваще одинаковый код нарисовывается, надо бы подумать
     def sign_in
-        _refresh_token if @jwt == nil
+      @user = User.find_by_login(params[:login])
+      if @user&.authenticate(params[:password])
+        token = ApplicationHelper::JsonWebToken.encode(user_id: @user.id)
         render json: {
-          login: params[:login],
-          password: params[:password],
-          jwt: @jwt
+          token: token
         }
+      else
+        render json: {
+          error: :unauthorized
+        }, status: :unauthorized
+      end
     end
 
   def sign_out
@@ -42,6 +40,12 @@ class AuthController < ApplicationController
     # TODO: Подумать как это сделать
     @jwt = nil
     head :ok
+  end
+
+  private
+  def user_params
+    # strong parameters
+    params.permit(:login, :password)
   end
 
 end
