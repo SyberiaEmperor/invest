@@ -38,9 +38,9 @@ class PortfoliosController < ApplicationController
       info: "There's ur info, sir!"
     }
   end
+
+
   #Создаёт портфель. Возвращает id созданного портфеля в случае успеха.
-  # Принимает в себя: ISIN/Ticker, количество, дату совершения(нет, но, вероятно, в будущем. Пока что дата - всегда сегодняшний день)
-  # Если id = nil, то создаётся портфель. В противном случае - транзакция записывается в уже существующий портфель
   def create
     title = params[:title]
     if title.nil?
@@ -48,8 +48,8 @@ class PortfoliosController < ApplicationController
     end
     @portfolio=Portfolio.new(user_id:@current_user.id, title:title)
     if @portfolio.save
-    render json:{},
-      status: :ok
+    render json:{id: @portfolio.id},
+      status: :created
     else
       render json: {
         errors: @portfolio.errors.full_messages

@@ -21,10 +21,9 @@ Rails.application.routes.draw do
   get '/portfolios', to: 'portfolios#index', defaults: { currency: 'RUB' }
 
   #Создаёт портфель. Возвращает id созданного портфеля в случае успеха.
-  # Принимает в себя: ISIN/Ticker, количество, дату совершения(нет, но, вероятно, в будущем. Пока что дата - всегда сегодняшний день)
-  # Если id = nil, то создаётся портфель. В противном случае - транзакция записывается в уже существующий портфель
-
   post '/portfolios', to: 'portfolios#create'
+  #Создаёт транзакцию в потрфеле. Возвращает id созданной транзакции в случае успеха.
+  # Принимает в себя: Ticker, количество, изменение баланса, id портфеля
   post '/portfolios/:portfolio_id/transaction', to: 'transaction#create'
 
 
