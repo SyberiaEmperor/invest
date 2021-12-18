@@ -1,12 +1,11 @@
 class UserController < ApplicationController
+  before_action :authorize_request
 
   def info
-    #Получаем токен из Header и делаем магию
-    render json: {
-      name: "Name",
-      id:1,
-      hz:nil
-    }
+   render json: {
+     login: @current_user.login,
+     portfolios_count: @current_user.portfolios.count
+   }
   end
 
 end
