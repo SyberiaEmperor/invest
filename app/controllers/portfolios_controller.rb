@@ -1,4 +1,8 @@
 class PortfoliosController < ApplicationController
+  before_action :authorize_request
+  skip_before_action :verify_authenticity_token
+
+
   @available_currency = [
     :RUB,
     :EUR,
@@ -38,32 +42,27 @@ class PortfoliosController < ApplicationController
   # Принимает в себя: ISIN/Ticker, количество, дату совершения(нет, но, вероятно, в будущем. Пока что дата - всегда сегодняшний день)
   # Если id = nil, то создаётся портфель. В противном случае - транзакция записывается в уже существующий портфель
   def create
-    if _empty_token
-      head :unauthorized
-      return
+    title = params[:title]
+    if title.nil?
+      "DefaultName"
     end
-    #creating transaction
-    p @_response_body
-    portfolio = 1
-    render json:{
-      id:params[:id],
-      portfolio_id: portfolio
-    }
+    @portfolio=Portfolio.new(user_id:@current_user.id, title:title)
+    if @portfolio.save
+    render json:{},
+      status: :ok
+    else
+      render json: {
+        errors: @portfolio.errors.full_messages
+      },
+            status: :unprocessable_entity
+    end
 end
 
   #Удаляет портфель по заданному id. Если id = nil - ничего не происходит.
   def delete
-    if _empty_token
-      head :unauthorized
-      return
-    end
-    head :ok
-  end
-
-  def _empty_token
-    token = request.headers[:Authorization]
-    token.to_s.empty?
 
   end
+
+
 
 end

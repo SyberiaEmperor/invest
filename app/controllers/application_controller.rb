@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
     header = header.split(' ').last if header
     begin
       @decoded = ApplicationHelper::JsonWebToken.decode(header)
+      p @decoded
       @current_user = User.find(@decoded[:user_id])
     rescue ActiveRecord::RecordNotFound => e
       render json: {errors: e.message}, status: :unauthorized
