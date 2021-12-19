@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_15_183933) do
+ActiveRecord::Schema.define(version: 2021_12_19_082355) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,7 +23,7 @@ ActiveRecord::Schema.define(version: 2021_12_15_183933) do
     t.index ["user_id"], name: "index_portfolios_on_user_id"
   end
 
-  create_table "storage", id: false, force: :cascade do |t|
+  create_table "storage", force: :cascade do |t|
     t.bigint "portfolio_id"
     t.string "ticker", null: false
     t.integer "amount", null: false
