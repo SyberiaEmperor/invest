@@ -30,7 +30,7 @@ class PortfoliosController < ApplicationController
       render status: :not_found
     end
     jsonData = port.as_json(:include =>
-      :transactions )
+                              :transactions )
     render json: jsonData
   end
 
