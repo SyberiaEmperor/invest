@@ -26,17 +26,11 @@ class PortfoliosController < ApplicationController
   end
 
   def index
-    if _empty_token
-      head :unauthorized
-      return
+    all_por = @current_user.portfolios.all
+    json_data = all_por.map do |portf|
+      portf.as_json
     end
-    display_currency = params[:currency]
-    display_currency = @default_currency unless @available_currency.include? display_currency
-    render json:{
-      currency: display_currency,
-      id: id,
-      info: "There's ur info, sir!"
-    }
+    render json: json_data
   end
 
 
