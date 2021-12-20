@@ -18,6 +18,8 @@ class PortfoliosController < ApplicationController
   @default_currency = @available_currency.first
 
   def show
+    currency = params[:currency]
+    cur_per_rub = currency == "RUB" ? 1 :MoexAPI::Client.get_currency_pair(currency)
     id = params[:id]
     unless id.is_integer?
       render json: {
@@ -31,13 +33,26 @@ class PortfoliosController < ApplicationController
     end
     jsonData = port.as_json(:include =>
                               :transactions )
+    jsonData[:currency] = currency
+    jsonData[:value] = 0
+    port.storages.each { |storage|
+      jsonData[:value]+=(((MoexAPI::Client.get_info_by_ticker(storage.ticker)*storage.amount)/cur_per_rub)*100).to_i
+    }
     render json: jsonData
   end
 
   def index
+    currency = params[:currency]
+    cur_per_rub = currency == "RUB" ? 1 :MoexAPI::Client.get_currency_pair(currency)
     all_por = @current_user.portfolios.all
     json_data = all_por.map do |portf|
-      portf.as_json
+      res = portf.as_json
+      res[:currency] = currency
+      res[:value] = 0
+      portf.storages.each { |storage|
+        res[:value]+=(((MoexAPI::Client.get_info_by_ticker(storage.ticker)*storage.amount)/cur_per_rub)*100).to_i
+      }
+      res
     end
     render json: json_data
   end
@@ -63,7 +78,16 @@ end
 
   #Удаляет портфель по заданному id. Если id = nil - ничего не происходит.
   def delete
+    port = @current_user.portfolios.find(params[:id])
+    if port.nil?
+      render status: :not_found
+    end
 
+    port.transactions.destroy_all
+    port.storages.destroy_all
+    port.destroy
+    render json: {message: 'Portfolio successfully deleted'},
+           status: :ok
   end
 
 

@@ -23,11 +23,11 @@ ActiveRecord::Schema.define(version: 2021_12_19_082355) do
     t.index ["user_id"], name: "index_portfolios_on_user_id"
   end
 
-  create_table "storage", force: :cascade do |t|
+  create_table "storages", force: :cascade do |t|
     t.bigint "portfolio_id"
     t.string "ticker", null: false
     t.integer "amount", null: false
-    t.index ["portfolio_id"], name: "index_storage_on_portfolio_id"
+    t.index ["portfolio_id"], name: "index_storages_on_portfolio_id"
   end
 
   create_table "transactions", force: :cascade do |t|

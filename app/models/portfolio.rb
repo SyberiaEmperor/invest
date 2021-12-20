@@ -3,5 +3,5 @@ class Portfolio < ApplicationRecord
   belongs_to :user
   has_many :transactions
   #TODO: has_many, not has_one
-  has_one :storage
+  has_many :storages
 end

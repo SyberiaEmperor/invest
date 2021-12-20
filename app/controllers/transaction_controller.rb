@@ -12,7 +12,7 @@ class TransactionController < ApplicationController
         error: "Invalid portfolio's ID"
       }, status: :not_acceptable
     end
-    MoexAPI::Client.init
+    #MoexAPI::Client.init
     ticker = params[:ticker]
     if ticker.nil?
       render json: {
