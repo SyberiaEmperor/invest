@@ -9,3 +9,6 @@ Provides an API for holding an info about invest portfolio.
    * gem 'faraday'
    * gem 'nokogiri'
    * gem 'jwt'
+
+* Documentation
+  [POSTMAN](https://documenter.getpostman.com/view/11575297/UVRBmmEG)
