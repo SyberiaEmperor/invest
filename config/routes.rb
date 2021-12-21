@@ -9,8 +9,6 @@ Rails.application.routes.draw do
 
   #Secure zone. Для корректного выполнения требуется JWT-токен в заголовке запроса.
 
-
-
   get '/user', to: 'user#info' #Выдаёт общую информацию по пользователю. Например: Логин, кол-во портфелей
 
   #Даёт информацию о портфелях пользователя. Если id пустой - возвращает краткую сводку по всем портфелям пользователя.
@@ -18,7 +16,7 @@ Rails.application.routes.draw do
   #Параметр currency отвечает за то, в какой валюте будет отображен портфель.
   get '/portfolios/:id', to: 'portfolios#show'#, defaults: { currency: 'RUB' }
 
-  get '/portfolios', to: 'portfolios#index'#, defaults: { currency: 'RUB' }
+  get '/portfolios', to: 'portfolios#index'#, defaults: { :currency => 'RUB' }
 
   #Создаёт портфель. Возвращает id созданного портфеля в случае успеха.
   post '/portfolios', to: 'portfolios#create'
@@ -29,6 +27,5 @@ Rails.application.routes.draw do
 
   #Удаляет портфель по заданному id. Если id = nil - ничего не происходит.
   delete '/portfolios/:id', to: 'portfolios#delete'
-
 
 end

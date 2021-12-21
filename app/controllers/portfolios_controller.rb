@@ -9,16 +9,11 @@ class PortfoliosController < ApplicationController
   skip_before_action :verify_authenticity_token
 
 
-
-  @available_currency = [
-    :RUB,
-    :EUR,
-    :USD
-  ]
-  @default_currency = @available_currency.first
+  @@default_currency = "RUB"
 
   def show
     currency = params[:currency]
+    currency = @@default_currency if currency.nil?
     cur_per_rub = currency == "RUB" ? 1 :MoexAPI::Client.get_currency_pair(currency)
     id = params[:id]
     unless id.is_integer?
@@ -27,30 +22,47 @@ class PortfoliosController < ApplicationController
       },
              status: :bad_request
     end
+    begin
     port = @current_user.portfolios.find(id)
+    rescue ActiveRecord::RecordNotFound
+      render json: {
+        error: "No such portfolio"
+      }, status: :not_found
+      return
+      end
+
     if port.nil?
-      render status: :not_found
+      render json: {error: "No such portfolio"}, status: :not_found
+      return
     end
-    jsonData = port.as_json(:include =>
-                              :transactions )
-    jsonData[:currency] = currency
-    jsonData[:value] = 0
+    json_data = port.as_json(:include =>
+                               [:transactions, :storages] )
+    json_data[:currency] = currency
+    json_data[:value] = 0
     port.storages.each { |storage|
-      jsonData[:value]+=(((MoexAPI::Client.get_info_by_ticker(storage.ticker)*storage.amount)/cur_per_rub)*100).to_i
+      json_data[:value]+=(((MoexAPI::Client.get_info_by_ticker(storage.ticker)*storage.amount)/cur_per_rub)*100).to_i
     }
-    render json: jsonData
+    render json: json_data
   end
 
   def index
     currency = params[:currency]
+    currency = @@default_currency if currency.nil?
+    begin
     cur_per_rub = currency == "RUB" ? 1 :MoexAPI::Client.get_currency_pair(currency)
+    rescue MoexAPI::NoSuchCurrencyPair
+      render json: {
+        error: "Invalid currency"
+      }, status: :bad_request
+      return
+      end
     all_por = @current_user.portfolios.all
     json_data = all_por.map do |portf|
-      res = portf.as_json
+      res = portf.as_json :include => {:storages => {:except => [:portfolio_id, :id]}}
       res[:currency] = currency
-      res[:value] = 0
+      res[:total_cost] = 0
       portf.storages.each { |storage|
-        res[:value]+=(((MoexAPI::Client.get_info_by_ticker(storage.ticker)*storage.amount)/cur_per_rub)*100).to_i
+        res[:total_cost]+=(((MoexAPI::Client.get_info_by_ticker(storage.ticker)*storage.amount)/cur_per_rub)*100).to_i
       }
       res
     end
@@ -78,9 +90,13 @@ end
 
   #Удаляет портфель по заданному id. Если id = nil - ничего не происходит.
   def delete
-    port = @current_user.portfolios.find(params[:id])
-    if port.nil?
-      render status: :not_found
+    begin
+      port = @current_user.portfolios.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      render json: {
+        error: "No such portfolio"
+      }, status: :not_found
+      return
     end
 
     port.transactions.destroy_all

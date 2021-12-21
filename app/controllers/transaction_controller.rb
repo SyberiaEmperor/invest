@@ -12,13 +12,13 @@ class TransactionController < ApplicationController
         error: "Invalid portfolio's ID"
       }, status: :not_acceptable
     end
-    #MoexAPI::Client.init
     ticker = params[:ticker]
     if ticker.nil?
       render json: {
         errors: "Ticker is necessary"
       },
              status: :bad_request
+      return
     end
     price = MoexAPI::Client.get_info_by_ticker ticker
     amount = params[:amount].to_i
@@ -28,7 +28,7 @@ class TransactionController < ApplicationController
       },
              status: :bad_request
     end
-    balance_change = price * amount
+    balance_change = (-(price * amount) * 100).to_i
     @t = Transaction.create ticker: ticker, amount: amount,balance_change:balance_change, portfolio_id: p.id
     if @t.save
       render json:{id: @t.id,
