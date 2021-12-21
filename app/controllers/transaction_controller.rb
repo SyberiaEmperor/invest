@@ -6,11 +6,13 @@ class TransactionController < ApplicationController
   protect_from_forgery with: :null_session
   # Принимает в себя: Ticker, количество, изменение баланса, id портфеля
   def create
+    begin
     p = @current_user.portfolios.find params[:portfolio_id]
-    if p.nil?
+    rescue  ActiveRecord::RecordNotFound
       render json: {
         error: "Invalid portfolio's ID"
       }, status: :not_acceptable
+      return
     end
     ticker = params[:ticker]
     if ticker.nil?
@@ -20,7 +22,12 @@ class TransactionController < ApplicationController
              status: :bad_request
       return
     end
+    begin
     price = MoexAPI::Client.get_info_by_ticker ticker
+    rescue MoexAPI::NoSuchTickerError
+      render json: {error: "Invalid ticker provided"}, status: :bad_request
+      return
+      end
     amount = params[:amount].to_i
     if amount.nil?
       render json: {
