@@ -72,10 +72,9 @@ class PortfoliosController < ApplicationController
 
   #Создаёт портфель. Возвращает id созданного портфеля в случае успеха.
   def create
-    title = params[:title]
-    if title.nil?
-      "DefaultName"
-    end
+    title = params[:title].to_s
+    title = "DefaultName" if title == ""
+
     @portfolio=Portfolio.new(user_id:@current_user.id, title:title)
     if @portfolio.save
     render json:{id: @portfolio.id},
